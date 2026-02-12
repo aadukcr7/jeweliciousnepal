@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Products | Jewelicious Nepal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <nav class="nav" aria-label="Main navigation">
+      <div class="nav-brand">Jewelicious Nepal</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a class="active" href="products.html">Products</a>
+        <a href="about.html">About Us</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <header>
+        <div class="logo">
+          <img src="logo.png" alt="Project logo" />
+        </div>
+        <h1>Our Products</h1>
+        <p>Browse the collection and select a piece to view full details.</p>
+      </header>
+
+      <div class="search-wrap">
+        <label class="search" aria-label="Search products">
+          <span aria-hidden="true">&#128269;</span>
+          <input id="searchInput" type="text" placeholder="Search by product name or type..." />
+        </label>
+      </div>
+    </section>
+
+    <div id="status" class="status">Loading products...</div>
+
+    <section class="products-layout">
+      <div class="section">
+        <h2>Browse Products</h2>
+        <p>Click a product to update the details panel.</p>
+        <div id="productList" class="grid" aria-live="polite"></div>
+      </div>
+
+      <div class="detail-card" id="productDetail" aria-live="polite">
+        <img id="detailImage" alt="" />
+        <div class="detail-body">
+          <span class="type-badge" id="detailType"></span>
+          <h2 id="detailTitle"></h2>
+          <p id="detailDescription"></p>
+          <div class="detail-meta">
+            <span class="price" id="detailPrice"></span>
+            <span id="detailId"></span>
+          </div>
+          <div class="detail-actions">
+            <a class="button" href="index.html">Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer" aria-label="Jewelicious Nepal footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <h2>Jewelicious Nepal</h2>
+          <p>Handcrafted jewelry with modern Nepali charm.</p>
+        </div>
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h3>Visit</h3>
+            <p>Thamel, Kathmandu, Nepal</p>
+          </div>
+          <div class="footer-col">
+            <h3>Contact</h3>
+            <p>+977 9800000000</p>
+            <p>hello@jeweliciousnepal.com</p>
+          </div>
+          <div class="footer-col">
+            <h3>Hours</h3>
+            <p>Mon-Sat: 10:00 AM-7:00 PM</p>
+            <p>Sun: Closed</p>
+          </div>
+          <div class="footer-col">
+            <h3>Social</h3>
+            <a href="https://instagram.com/jeweliciousnepal" target="_blank" rel="noopener">Instagram</a><br />
+            <a href="https://facebook.com/jeweliciousnepal" target="_blank" rel="noopener">Facebook</a><br />
+            <a href="https://wa.me/9779800000000" target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+        </div>
+        <div class="footer-bottom">© 2026 Jewelicious Nepal. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const SHEET_ID = "YOUR_SHEET_ID";
+    const DATA_URL = `https://opensheet.elk.sh/${SHEET_ID}/Sheet1`;
+
+    const searchInput = document.getElementById("searchInput");
+    const productList = document.getElementById("productList");
+    const statusEl = document.getElementById("status");
+
+    const detailImage = document.getElementById("detailImage");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailDescription = document.getElementById("detailDescription");
+    const detailPrice = document.getElementById("detailPrice");
+    const detailType = document.getElementById("detailType");
+    const detailId = document.getElementById("detailId");
+
+    let products = [];
+    let filteredProducts = [];
+    let selectedId = null;
+
+    const escapeHtml = (value) => {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    };
+
+    const formatPrice = (value) => {
+      if (!value) return "";
+      const numeric = Number(String(value).replace(/[^0-9.]/g, ""));
+      if (Number.isNaN(numeric)) return value;
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2
+      }).format(numeric);
+    };
+
+    const getType = (item) => {
+      const source = `${item.Name || ""} ${item.Description || ""}`.toLowerCase();
+      if (/(earring|earrings|earing)/.test(source)) return "Earrings";
+      if (/(ring|rings)/.test(source)) return "Rings";
+      if (/(necklace|necklaces)/.test(source)) return "Necklaces";
+      if (/(bracelet|bracelets)/.test(source)) return "Bracelets";
+      if (/(hairpin|hair pins|hair pin)/.test(source)) return "Hairpins";
+      return "Accessories";
+    };
+
+    const renderList = (items) => {
+      productList.innerHTML = "";
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No products match your search.";
+        productList.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item) => {
+        const typeLabel = getType(item);
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${escapeHtml(item.ImageURL)}" alt="${escapeHtml(item.Name)}" />
+          <div class="card-body">
+            <span class="type-badge">${escapeHtml(typeLabel)}</span>
+            <h3>${escapeHtml(item.Name)}</h3>
+            <p>${escapeHtml(item.Description || "")}</p>
+            <div class="price">${escapeHtml(formatPrice(item.Price))}</div>
+            <button class="button" data-id="${escapeHtml(item.ID)}">Show Details</button>
+          </div>
+        `;
+        productList.appendChild(card);
+      });
+    };
+
+    const showDetail = (item) => {
+      selectedId = String(item.ID ?? "");
+      detailImage.src = item.ImageURL || "";
+      detailImage.alt = item.Name || "";
+      detailTitle.textContent = item.Name || "";
+      detailDescription.textContent = item.Description || "";
+      detailPrice.textContent = formatPrice(item.Price);
+      detailType.textContent = getType(item);
+      detailId.textContent = item.ID ? `ID: ${item.ID}` : "";
+    };
+
+    const selectFirst = (items) => {
+      if (items.length) {
+        showDetail(items[0]);
+      }
+    };
+
+    const loadProducts = async () => {
+      statusEl.textContent = "Loading products...";
+      statusEl.style.display = "block";
+      try {
+        const response = await fetch(DATA_URL);
+        if (!response.ok) {
+          throw new Error("Failed to fetch products.");
+        }
+        const data = await response.json();
+        products = Array.isArray(data) ? data : [];
+        filteredProducts = products;
+        renderList(filteredProducts);
+
+        const urlId = new URLSearchParams(window.location.search).get("id");
+        const initial = products.find((item) => String(item.ID) === String(urlId)) || products[0];
+        if (initial) {
+          showDetail(initial);
+        }
+        statusEl.style.display = "none";
+      } catch (error) {
+        statusEl.textContent = "Unable to load products. Check the sheet ID or try again later.";
+      }
+    };
+
+    searchInput.addEventListener("input", (event) => {
+      const query = event.target.value.toLowerCase();
+      filteredProducts = products.filter((product) =>
+        `${product.Name || ""} ${product.Description || ""} ${getType(product)}`
+          .toLowerCase()
+          .includes(query)
+      );
+      renderList(filteredProducts);
+
+      const stillVisible = filteredProducts.find((item) => String(item.ID) === selectedId);
+      if (stillVisible) {
+        showDetail(stillVisible);
+      } else {
+        selectFirst(filteredProducts);
+      }
+    });
+
+    productList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-id]");
+      if (!button) return;
+      const item = products.find((product) => String(product.ID) === button.dataset.id);
+      if (item) {
+        showDetail(item);
+      }
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
