@@ -97,6 +97,27 @@
       </div>
     </footer>
   </div>
+
+  <div class="chatbot" data-sheet-id="1_jVEtTvxCu8e19A5WY_9HuMlzqwc39RNJ4slFDcGpQ8">
+    <button class="chatbot-toggle" type="button" aria-expanded="false" aria-controls="chatbotPanel">
+      Chat
+    </button>
+    <div class="chatbot-panel" id="chatbotPanel" role="dialog" aria-label="Product assistant" aria-hidden="true">
+      <div class="chatbot-header">
+        <div>
+          <strong>Product Assistant</strong>
+          <span>Ask about price or styles</span>
+        </div>
+        <button class="chatbot-close" type="button" aria-label="Close chat">Close</button>
+      </div>
+      <div class="chatbot-messages" aria-live="polite"></div>
+      <form class="chatbot-form">
+        <input type="text" name="message" placeholder="Try: gold ring, earrings, price of Luna" autocomplete="off" />
+        <button class="button" type="submit">Send</button>
+      </form>
+    </div>
   </div>
+
+  <script src="chatbot.js"></script>
 </body>
 </html>
