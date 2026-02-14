@@ -90,7 +90,7 @@
             Chat on WhatsApp
           </a>
         </div>
-        <form class="contact-form" action="mailto:jeweliciousnepal@gmail.com" method="post" enctype="text/plain">
+        <form class="contact-form" id="contactForm">
           <label class="form-field">
             <span>Name</span>
             <input type="text" name="name" placeholder="Your full name" required />
@@ -107,7 +107,7 @@
             <span>Message</span>
             <textarea name="message" rows="5" placeholder="Tell us about your idea..." required></textarea>
           </label>
-          <button class="button" type="submit">Send Message</button>
+          <button class="button" type="submit">Send on WhatsApp</button>
         </form>
       </div>
     </section>
@@ -193,6 +193,7 @@
     const modalPrice = document.getElementById("modalPrice");
     const modalType = document.getElementById("modalType");
     const modalClose = document.getElementById("modalClose");
+    const contactForm = document.getElementById("contactForm");
 
     let products = [];
 
@@ -316,6 +317,28 @@
         closeModal();
       }
     });
+
+    if (contactForm) {
+      contactForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(contactForm);
+        const name = String(data.get("name") || "").trim();
+        const email = String(data.get("email") || "").trim();
+        const interest = String(data.get("interest") || "").trim();
+        const message = String(data.get("message") || "").trim();
+
+        const lines = [
+          "Hi Jewelicious Nepal,",
+          name ? `Name: ${name}` : null,
+          email ? `Email: ${email}` : null,
+          interest ? `Looking for: ${interest}` : null,
+          message ? `Message: ${message}` : null
+        ].filter(Boolean);
+
+        const url = `https://wa.me/9779864686868?text=${encodeURIComponent(lines.join("\n"))}`;
+        window.open(url, "_blank", "noopener");
+      });
+    }
 
     loadProducts();
   </script>
