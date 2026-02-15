@@ -1,9 +1,9 @@
 # Jewelicious Nepal
 
-A static, multi-page storefront for a Nepali jewelry brand. The site includes a homepage with product search and a modal view, a dedicated products page with a detail panel, and an about page describing the brand and services.
+A professional, static multi-page storefront for a Nepali jewelry brand. The site features a product-search experience with a modal detail view on the home page, a dedicated products catalog with a sticky detail panel, and an about page that highlights the brand story and services.
 
 ## Live demo
-- Add your GitHub Pages or hosted URL here.
+Add your GitHub Pages or hosted URL here.
 
 ## Features
 - Product search and instant filtering.
@@ -44,16 +44,16 @@ Set:
 - products.html
 - about.html
 - styles.css
-- logo.png
-- footer.jpeg
+- chatbot.js
+- images/
 
 ## Customization
 - Update brand text, contact info, and social links directly in the HTML files.
-- Replace logo.png and footer.jpeg with your own assets.
+- Replace images in the images/ folder with your own assets.
 - Update the owner photos referenced on the about page (see Notes).
 
 ## Notes
-- The about page references owner photos at `images/owner-1.jpg` and `images/owner-2.jpg`. Add those files or update the paths.
+- The about page references owner photos at images/owner-1.jpg and images/owner-2.jpg. Add those files or update the paths.
 - All content is static HTML/CSS with vanilla JavaScript.
 
 ## Contributing
