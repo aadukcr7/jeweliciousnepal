@@ -32,6 +32,29 @@
           <input id="searchInput" type="text" placeholder="Search by product name or type..." />
         </label>
       </div>
+
+      <div class="filter-bar" aria-label="Product filters">
+        <div class="filter-chips" role="tablist" aria-label="Filter by type">
+          <button class="chip active" type="button" data-type="all">All</button>
+          <button class="chip" type="button" data-type="Earrings">Earrings</button>
+          <button class="chip" type="button" data-type="Rings">Rings</button>
+          <button class="chip" type="button" data-type="Necklaces">Necklaces</button>
+          <button class="chip" type="button" data-type="Bracelets">Bracelets</button>
+          <button class="chip" type="button" data-type="Hairpins">Hairpins</button>
+          <button class="chip" type="button" data-type="Accessories">Accessories</button>
+        </div>
+        <div class="filter-range" aria-label="Filter by price">
+          <label class="filter-label">
+            Min
+            <input id="minPrice" type="number" min="0" placeholder="0" />
+          </label>
+          <label class="filter-label">
+            Max
+            <input id="maxPrice" type="number" min="0" placeholder="500" />
+          </label>
+          <button class="chip reset" id="clearFilters" type="button">Clear</button>
+        </div>
+      </div>
     </section>
 
     <div id="status" class="status">Loading products...</div>
@@ -121,6 +144,10 @@
     const searchInput = document.getElementById("searchInput");
     const productList = document.getElementById("productList");
     const statusEl = document.getElementById("status");
+    const minPriceInput = document.getElementById("minPrice");
+    const maxPriceInput = document.getElementById("maxPrice");
+    const clearFilters = document.getElementById("clearFilters");
+    const filterChips = document.querySelectorAll(".filter-chips .chip");
 
     const detailImage = document.getElementById("detailImage");
     const detailTitle = document.getElementById("detailTitle");
@@ -132,6 +159,7 @@
     let products = [];
     let filteredProducts = [];
     let selectedId = null;
+    let selectedType = "all";
 
     const escapeHtml = (value) => {
       const div = document.createElement("div");
@@ -158,6 +186,12 @@
       if (/(bracelet|bracelets)/.test(source)) return "Bracelets";
       if (/(hairpin|hair pins|hair pin)/.test(source)) return "Hairpins";
       return "Accessories";
+    };
+
+    const getPriceNumber = (value) => {
+      if (!value) return Number.NaN;
+      const numeric = Number(String(value).replace(/[^0-9.]/g, ""));
+      return Number.isNaN(numeric) ? Number.NaN : numeric;
     };
 
     const renderList = (items) => {
@@ -206,6 +240,38 @@
       }
     };
 
+    const applyFilters = () => {
+      const query = searchInput.value.toLowerCase();
+      const minValue = Number(minPriceInput.value);
+      const maxValue = Number(maxPriceInput.value);
+      const hasMin = minPriceInput.value !== "" && !Number.isNaN(minValue);
+      const hasMax = maxPriceInput.value !== "" && !Number.isNaN(maxValue);
+
+      filteredProducts = products.filter((product) => {
+        const searchText = `${product.Name || ""} ${product.Description || ""} ${getType(product)}`
+          .toLowerCase();
+        if (query && !searchText.includes(query)) return false;
+        if (selectedType !== "all" && getType(product) !== selectedType) return false;
+
+        if (hasMin || hasMax) {
+          const price = getPriceNumber(product.Price);
+          if (Number.isNaN(price)) return false;
+          if (hasMin && price < minValue) return false;
+          if (hasMax && price > maxValue) return false;
+        }
+        return true;
+      });
+
+      renderList(filteredProducts);
+
+      const stillVisible = filteredProducts.find((item) => String(item.ID) === selectedId);
+      if (stillVisible) {
+        showDetail(stillVisible);
+      } else {
+        selectFirst(filteredProducts);
+      }
+    };
+
     const loadProducts = async () => {
       statusEl.textContent = "Loading products...";
       statusEl.style.display = "block";
@@ -216,35 +282,36 @@
         }
         const data = await response.json();
         products = Array.isArray(data) ? data : [];
-        filteredProducts = products;
-        renderList(filteredProducts);
-
         const urlId = new URLSearchParams(window.location.search).get("id");
-        const initial = products.find((item) => String(item.ID) === String(urlId)) || products[0];
-        if (initial) {
-          showDetail(initial);
-        }
+        selectedId = urlId ? String(urlId) : null;
+        applyFilters();
         statusEl.style.display = "none";
       } catch (error) {
         statusEl.textContent = "Unable to load products. Check the sheet ID or try again later.";
       }
     };
 
-    searchInput.addEventListener("input", (event) => {
-      const query = event.target.value.toLowerCase();
-      filteredProducts = products.filter((product) =>
-        `${product.Name || ""} ${product.Description || ""} ${getType(product)}`
-          .toLowerCase()
-          .includes(query)
-      );
-      renderList(filteredProducts);
+    searchInput.addEventListener("input", applyFilters);
+    minPriceInput.addEventListener("input", applyFilters);
+    maxPriceInput.addEventListener("input", applyFilters);
 
-      const stillVisible = filteredProducts.find((item) => String(item.ID) === selectedId);
-      if (stillVisible) {
-        showDetail(stillVisible);
-      } else {
-        selectFirst(filteredProducts);
-      }
+    filterChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        selectedType = chip.dataset.type || "all";
+        filterChips.forEach((button) => button.classList.remove("active"));
+        chip.classList.add("active");
+        applyFilters();
+      });
+    });
+
+    clearFilters.addEventListener("click", () => {
+      selectedType = "all";
+      searchInput.value = "";
+      minPriceInput.value = "";
+      maxPriceInput.value = "";
+      filterChips.forEach((button) => button.classList.remove("active"));
+      filterChips[0]?.classList.add("active");
+      applyFilters();
     });
 
     productList.addEventListener("click", (event) => {
