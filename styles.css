@@ -48,11 +48,23 @@ body {
 }
 
 .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
   font-weight: 600;
   color: var(--brand);
   letter-spacing: -0.02em;
   font-size: 1.05rem;
+}
+
+.nav-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff6ef;
+  box-shadow: 0 6px 16px rgba(58, 28, 16, 0.12);
 }
 
 .nav-links {
